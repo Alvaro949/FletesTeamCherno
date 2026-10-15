@@ -1,0 +1,93 @@
+body {
+	margin-top: 0;
+	max-width: 1000px;
+}
+
+#app {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #333;
+	border-radius: 5px;
+	padding: 1em;
+	min-height: 100vh;
+}
+
+.barra {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #444;
+	padding-bottom: 0.5em;
+	margin-bottom: 1em;
+	width: 100%;
+}
+
+.barra h1 {
+	margin: 0;
+}
+
+.navegacion {
+	display: flex;
+	gap: 0.5em;
+	margin: 0;
+}
+
+.fletes-cards {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+	flex-wrap: wrap;
+	margin-bottom: 2em;
+}
+
+.card-flete {
+	border: 2px solid #00b4d8;
+	border-radius: 12px;
+	padding: 1em;
+	flex: 1 1 200px;
+	min-width: 200px;
+	text-align: center;
+	background-color: rgba(0, 180, 216, 0.05);
+	box-sizing: border-box;
+}
+
+.card-flete h3 {
+	margin-top: 0;
+	font-size: 1.1em;
+	color: #00b4d8;
+}
+
+.card-flete p {
+	margin: 0.3em 0;
+}
+
+.card-flete .chofer {
+	font-weight: bold;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+.card-flete .monto {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #2ec4b6;
+	margin-top: 0.5em;
+}
+
+.badge-pagado {
+	background-color: #2a9d8f;
+	color: white;
+	padding: 0.2em 0.6em;
+	border-radius: 4px;
+	font-size: 0.8em;
+}
+
+.badge-pendiente {
+	background-color: #e76f51;
+	color: white;
+	padding: 0.2em 0.6em;
+	border-radius: 4px;
+	font-size: 0.8em;
+}
