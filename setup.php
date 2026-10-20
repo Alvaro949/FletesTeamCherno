@@ -69,6 +69,8 @@ try {
 		['Miguel Ángel Torres'],
 		['Roberto Hernández'],
 		['José Luis Martínez'],
+		['Francisco Javier López'],
+		['Pedro Sánchez Ruiz'],
 	]);
 
 	insertar($db, 'INSERT INTO unidades (placas, modelo) VALUES (?, ?)', [
@@ -76,6 +78,8 @@ try {
 		['GT-7834-B', 'Freightliner Cascadia'],
 		['GT-1290-C', 'International LT625'],
 		['QR-5567-D', 'Volvo VNL 760'],
+		['GT-3345-E', 'Kenworth T880'],
+		['GT-8812-F', 'Freightliner M2 106'],
 	]);
 
 	insertar($db, 'INSERT INTO fletes (cliente_id, chofer_id, unidad_id, origen, destino, monto, estatus, pagado, fecha)

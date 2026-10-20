@@ -91,3 +91,116 @@ table {
 	border-radius: 4px;
 	font-size: 0.8em;
 }
+
+.barra {
+	flex-wrap: wrap;
+	gap: 0.5em;
+}
+
+.navegacion {
+	flex-wrap: wrap;
+}
+
+.navegacion a {
+	padding: 0.4em 0.8em;
+	border-radius: 6px;
+	text-decoration: none;
+}
+
+.navegacion a.exact-active {
+	background-color: rgba(0, 180, 216, 0.15);
+	color: #00b4d8;
+	font-weight: bold;
+}
+
+#principal {
+	flex: 1;
+}
+
+.aviso {
+	position: fixed;
+	bottom: 1em;
+	right: 1em;
+	z-index: 10;
+	max-width: 360px;
+	padding: 0.8em 1em;
+	border-radius: 8px;
+	color: white;
+	background-color: #2a9d8f;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.aviso.error {
+	background-color: #e76f51;
+}
+
+.error-campo {
+	display: block;
+	color: #e76f51;
+	min-height: 1em;
+}
+
+.rejilla {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 0 1em;
+}
+
+.rejilla select,
+.rejilla input {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.acciones {
+	white-space: nowrap;
+	text-align: right;
+}
+
+.acciones button {
+	margin: 0 0 0 0.3em;
+	padding: 0.3em 0.7em;
+}
+
+.estado {
+	display: inline-block;
+	white-space: nowrap;
+	padding: 0.2em 0.6em;
+	border-radius: 4px;
+	font-size: 0.8em;
+	color: white;
+}
+
+.estado.disponible { background-color: #2a9d8f; }
+.estado.asignado   { background-color: #e9c46a; color: #222; }
+.estado.en_ruta    { background-color: #00b4d8; }
+
+@media (max-width: 600px) {
+	#app {
+		padding: 0.5em;
+	}
+
+	table {
+		font-size: 0.9em;
+	}
+
+	.acciones {
+		white-space: normal;
+	}
+
+	.acciones button {
+		display: block;
+		width: 100%;
+		margin: 0.2em 0;
+	}
+
+	.aviso {
+		left: 1em;
+	}
+}
+
+footer {
+	margin-top: 2em;
+	font-size: 0.85em;
+	opacity: 0.7;
+}
