@@ -44,7 +44,7 @@
 										<h3 x-text="`#${f.id} · ${f.origen} → ${f.destino}`"></h3>
 										<p x-text="f.cliente"></p>
 										<p class="chofer" x-text="f.chofer"></p>
-										<p x-text="`${f.placas} · ${f.modelo}`"></p>
+										<p x-text="`${f.placa} · ${f.marca} ${f.modelo}`"></p>
 										<p class="monto" x-text="dinero(f.monto)"></p>
 										<span :class="f.pagado ? 'badge-pagado' : 'badge-pendiente'" x-text="f.pagado ? 'Pagado' : 'Por cobrar'"></span>
 										<p>
@@ -66,7 +66,7 @@
 							<select x-model="form.cliente_id" required>
 								<option value="">Selecciona…</option>
 								<template x-for="c in clientes" :key="c.id">
-									<option :value="c.id" x-text="c.nombre"></option>
+									<option :value="c.id" x-text="c.razon_social"></option>
 								</template>
 							</select>
 							<small class="error-campo" x-text="errores.cliente_id"></small>
@@ -86,7 +86,7 @@
 							<select x-model="form.unidad_id" required>
 								<option value="" x-text="unidades.length ? 'Selecciona…' : 'No hay unidades disponibles'"></option>
 								<template x-for="u in unidades" :key="u.id">
-									<option :value="u.id" x-text="`${u.placas} · ${u.modelo}`"></option>
+									<option :value="u.id" x-text="`${u.placa} · ${u.marca} ${u.modelo}`"></option>
 								</template>
 							</select>
 							<small class="error-campo" x-text="errores.unidad_id"></small>
@@ -116,13 +116,17 @@
 			</template>
 
 			<template x-route="/clientes">
-				<section x-data="catalogo('clientes', ['nombre'])">
+				<section x-data="catalogo('clientes', ['razon_social', 'rfc', 'email'])">
 					<h2>Clientes</h2>
 					<form @submit.prevent="guardar">
 						<fieldset>
 							<legend x-text="editando ? `Editar cliente #${editando}` : 'Nuevo cliente'"></legend>
-							<label>Nombre <input x-model="form.nombre" required></label>
-							<small class="error-campo" x-text="errores.nombre"></small>
+							<label>Razón social <input x-model="form.razon_social" required></label>
+							<small class="error-campo" x-text="errores.razon_social"></small>
+							<label>RFC <input x-model="form.rfc" required maxlength="13" placeholder="ABC010101XY1"></label>
+							<small class="error-campo" x-text="errores.rfc"></small>
+							<label>Email <input type="email" x-model="form.email" required></label>
+							<small class="error-campo" x-text="errores.email"></small>
 							<div>
 								<button :disabled="guardando" x-text="editando ? 'Guardar cambios' : 'Agregar'"></button>
 								<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
@@ -132,15 +136,17 @@
 
 					<p x-show="cargando">Cargando…</p>
 					<table x-show="!cargando">
-						<thead><tr><th>#</th><th>Nombre</th><th></th></tr></thead>
+						<thead><tr><th>#</th><th>Razón social</th><th>RFC</th><th>Email</th><th></th></tr></thead>
 						<tbody>
 							<template x-for="c in filas" :key="c.id">
 								<tr>
 									<td x-text="c.id"></td>
-									<td x-text="c.nombre"></td>
+									<td x-text="c.razon_social"></td>
+									<td x-text="c.rfc"></td>
+									<td x-text="c.email"></td>
 									<td class="acciones">
 										<button @click="editar(c)">Editar</button>
-										<button @click="eliminar(c, c.nombre)">Eliminar</button>
+										<button @click="eliminar(c, c.razon_social)">Eliminar</button>
 									</td>
 								</tr>
 							</template>
@@ -150,13 +156,15 @@
 			</template>
 
 			<template x-route="/choferes">
-				<section x-data="catalogo('choferes', ['nombre'])">
+				<section x-data="catalogo('choferes', ['nombre', 'licencia'])">
 					<h2>Choferes</h2>
 					<form @submit.prevent="guardar">
 						<fieldset>
 							<legend x-text="editando ? `Editar chofer #${editando}` : 'Nuevo chofer'"></legend>
 							<label>Nombre <input x-model="form.nombre" required></label>
 							<small class="error-campo" x-text="errores.nombre"></small>
+							<label>Licencia <input x-model="form.licencia" required></label>
+							<small class="error-campo" x-text="errores.licencia"></small>
 							<div>
 								<button :disabled="guardando" x-text="editando ? 'Guardar cambios' : 'Agregar'"></button>
 								<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
@@ -166,12 +174,13 @@
 
 					<p x-show="cargando">Cargando…</p>
 					<table x-show="!cargando">
-						<thead><tr><th>#</th><th>Nombre</th><th>Estado</th><th></th></tr></thead>
+						<thead><tr><th>#</th><th>Nombre</th><th>Licencia</th><th>Estado</th><th></th></tr></thead>
 						<tbody>
 							<template x-for="c in filas" :key="c.id">
 								<tr>
 									<td x-text="c.id"></td>
 									<td x-text="c.nombre"></td>
+									<td x-text="c.licencia"></td>
 									<td>
 										<span class="estado" :class="c.estado" x-text="etiqueta(c.estado)"></span>
 										<small x-show="c.flete_actual" x-text="`flete #${c.flete_actual}`"></small>
@@ -188,15 +197,19 @@
 			</template>
 
 			<template x-route="/unidades">
-				<section x-data="catalogo('unidades', ['placas', 'modelo'])">
+				<section x-data="catalogo('unidades', ['placa', 'marca', 'modelo', 'anio'])">
 					<h2>Unidades</h2>
 					<form @submit.prevent="guardar">
 						<fieldset>
 							<legend x-text="editando ? `Editar unidad #${editando}` : 'Nueva unidad'"></legend>
-							<label>Placas <input x-model="form.placas" required placeholder="GT-1234-A"></label>
-							<small class="error-campo" x-text="errores.placas"></small>
-							<label>Modelo <input x-model="form.modelo" required placeholder="Kenworth T680"></label>
+							<label>Placa <input x-model="form.placa" required placeholder="GT-1234-A"></label>
+							<small class="error-campo" x-text="errores.placa"></small>
+							<label>Marca <input x-model="form.marca" required placeholder="Kenworth"></label>
+							<small class="error-campo" x-text="errores.marca"></small>
+							<label>Modelo <input x-model="form.modelo" required placeholder="T680"></label>
 							<small class="error-campo" x-text="errores.modelo"></small>
+							<label>Año <input type="number" x-model="form.anio" required min="1950" max="2100"></label>
+							<small class="error-campo" x-text="errores.anio"></small>
 							<div>
 								<button :disabled="guardando" x-text="editando ? 'Guardar cambios' : 'Agregar'"></button>
 								<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
@@ -206,20 +219,22 @@
 
 					<p x-show="cargando">Cargando…</p>
 					<table x-show="!cargando">
-						<thead><tr><th>#</th><th>Placas</th><th>Modelo</th><th>Estado</th><th></th></tr></thead>
+						<thead><tr><th>#</th><th>Placa</th><th>Marca</th><th>Modelo</th><th>Año</th><th>Estado</th><th></th></tr></thead>
 						<tbody>
 							<template x-for="u in filas" :key="u.id">
 								<tr>
 									<td x-text="u.id"></td>
-									<td x-text="u.placas"></td>
+									<td x-text="u.placa"></td>
+									<td x-text="u.marca"></td>
 									<td x-text="u.modelo"></td>
+									<td x-text="u.anio"></td>
 									<td>
 										<span class="estado" :class="u.estado" x-text="etiqueta(u.estado)"></span>
 										<small x-show="u.flete_actual" x-text="`flete #${u.flete_actual}`"></small>
 									</td>
 									<td class="acciones">
 										<button @click="editar(u)">Editar</button>
-										<button @click="eliminar(u, `la unidad ${u.placas}`)">Eliminar</button>
+										<button @click="eliminar(u, `la unidad ${u.placa}`)">Eliminar</button>
 									</td>
 								</tr>
 							</template>

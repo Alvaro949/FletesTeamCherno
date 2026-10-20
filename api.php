@@ -15,19 +15,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 const RECURSOS = [
     'clientes' => [
         'tabla'    => 'clientes',
-        'campos'   => ['nombre'],
+        'campos'   => ['razon_social', 'rfc', 'email'],
         'singular' => 'cliente',
         'fk'       => 'cliente_id',
     ],
     'choferes' => [
         'tabla'    => 'choferes',
-        'campos'   => ['nombre'],
+        'campos'   => ['nombre', 'licencia'],
         'singular' => 'chofer',
         'fk'       => 'chofer_id',
     ],
     'unidades' => [
         'tabla'    => 'unidades',
-        'campos'   => ['placas', 'modelo'],
+        'campos'   => ['placa', 'marca', 'modelo', 'anio'],
         'singular' => 'unidad',
         'fk'       => 'unidad_id',
     ],
@@ -120,26 +120,18 @@ function validar($db, $recurso, array $datos, $actual) {
     switch ($recurso) {
         case 'clientes':
         case 'choferes':
-            if ($revisar('nombre')) {
-                $datos['nombre'] = texto($datos['nombre'] ?? '');
-                if (mb_strlen($datos['nombre']) < 3) {
-                    $errores['nombre'] = 'El nombre debe tener al menos 3 caracteres.';
-                }
-            }
-            break;
-
         case 'unidades':
-            if ($revisar('placas')) {
-                $datos['placas'] = strtoupper(preg_replace('/\s+/', '', texto($datos['placas'] ?? '')));
-                if (!preg_match('/^[A-Z0-9-]{5,10}$/', $datos['placas'])) {
-                    $errores['placas'] = 'Placas inválidas (5 a 10 caracteres: letras, números o guiones).';
+            // Catálogos simples: todos los campos son obligatorios.
+            foreach (RECURSOS[$recurso]['campos'] as $campo) {
+                if (!$revisar($campo)) continue;
+                $datos[$campo] = texto($datos[$campo] ?? '');
+                if ($datos[$campo] === '') {
+                    $errores[$campo] = 'Este campo es obligatorio.';
                 }
             }
-            if ($revisar('modelo')) {
-                $datos['modelo'] = texto($datos['modelo'] ?? '');
-                if (mb_strlen($datos['modelo']) < 2) {
-                    $errores['modelo'] = 'El modelo es obligatorio.';
-                }
+            if (isset($datos['placa'])) $datos['placa'] = strtoupper($datos['placa']);
+            if (isset($datos['anio']) && entero($datos['anio']) === null) {
+                $errores['anio'] = 'El año debe ser un número.';
             }
             break;
 
@@ -230,11 +222,11 @@ function validar($db, $recurso, array $datos, $actual) {
 }
 
 function validarUnicos($db, $recurso, array $datos, $id = 0) {
-    if ($recurso === 'unidades' && isset($datos['placas'])) {
-        $repetida = valor($db, 'SELECT id FROM unidades WHERE placas = :p AND id != :id',
-            [':p' => $datos['placas'], ':id' => $id]);
+    if ($recurso === 'unidades' && isset($datos['placa'])) {
+        $repetida = valor($db, 'SELECT id FROM unidades WHERE placa = :p AND id != :id',
+            [':p' => $datos['placa'], ':id' => $id]);
         if ($repetida !== null) {
-            error(409, "Ya existe una unidad con placas {$datos['placas']}.", ['placas' => 'Placas ya registradas.']);
+            error(409, "Ya existe una unidad con placa {$datos['placa']}.", ['placa' => 'Placa ya registrada.']);
         }
     }
 }
@@ -259,9 +251,10 @@ function listarConEstado($db, $tabla, $fk, $soloDisponibles) {
 }
 
 const SELECT_FLETES = "SELECT f.*,
-                              cl.nombre AS cliente,
+                              cl.razon_social AS cliente,
                               ch.nombre AS chofer,
-                              u.placas  AS placas,
+                              u.placa   AS placa,
+                              u.marca   AS marca,
                               u.modelo  AS modelo
                        FROM fletes f
                        JOIN clientes cl ON cl.id = f.cliente_id

@@ -14,19 +14,24 @@ try {
 	$db->exec('DROP TABLE IF EXISTS unidades');
 
 	$db->exec('CREATE TABLE clientes (
-		id     INTEGER PRIMARY KEY AUTOINCREMENT,
-		nombre TEXT NOT NULL
+		id           INTEGER PRIMARY KEY AUTOINCREMENT,
+		razon_social TEXT NOT NULL,
+		rfc          TEXT NOT NULL,
+		email        TEXT NOT NULL
 	)');
 
 	$db->exec('CREATE TABLE choferes (
-		id     INTEGER PRIMARY KEY AUTOINCREMENT,
-		nombre TEXT NOT NULL
+		id       INTEGER PRIMARY KEY AUTOINCREMENT,
+		nombre   TEXT NOT NULL,
+		licencia TEXT NOT NULL
 	)');
 
 	$db->exec('CREATE TABLE unidades (
 		id     INTEGER PRIMARY KEY AUTOINCREMENT,
-		placas TEXT NOT NULL UNIQUE,
-		modelo TEXT NOT NULL
+		placa  TEXT NOT NULL UNIQUE,
+		marca  TEXT NOT NULL,
+		modelo TEXT NOT NULL,
+		anio   INTEGER NOT NULL
 	)');
 
 	$db->exec("CREATE TABLE fletes (
@@ -56,30 +61,30 @@ try {
 		return date('Y-m-d', strtotime("-$dias days"));
 	}
 
-	insertar($db, 'INSERT INTO clientes (nombre) VALUES (?)', [
-		['Agroexportadora del Bajío'],
-		['Distribuidora Celaya'],
-		['Calzado Fino de León'],
-		['Granos y Semillas del Centro'],
-		['Autopartes Puerto Interior'],
+	insertar($db, 'INSERT INTO clientes (razon_social, rfc, email) VALUES (?, ?, ?)', [
+		['Agroexportadora del Bajío SA de CV',    'ABA150310KJ2', 'contacto@agrobajio.mx'],
+		['Distribuidora Celaya SA de CV',         'DCE980722MN4', 'compras@discelaya.mx'],
+		['Calzado Fino de León SA de CV',         'CFL050115PQ7', 'logistica@calzadofino.mx'],
+		['Granos y Semillas del Centro SC',       'GSC120901RT1', 'ventas@granoscentro.mx'],
+		['Autopartes Puerto Interior SA de CV',   'API170404XY9', 'embarques@autopartespi.mx'],
 	]);
 
-	insertar($db, 'INSERT INTO choferes (nombre) VALUES (?)', [
-		['Juan Carlos Ramírez'],
-		['Miguel Ángel Torres'],
-		['Roberto Hernández'],
-		['José Luis Martínez'],
-		['Francisco Javier López'],
-		['Pedro Sánchez Ruiz'],
+	insertar($db, 'INSERT INTO choferes (nombre, licencia) VALUES (?, ?)', [
+		['Juan Carlos Ramírez',    'GTO-E-104521'],
+		['Miguel Ángel Torres',    'GTO-E-208734'],
+		['Roberto Hernández',      'GTO-E-311290'],
+		['José Luis Martínez',     'QRO-E-405567'],
+		['Francisco Javier López', 'GTO-E-503345'],
+		['Pedro Sánchez Ruiz',     'GTO-E-608812'],
 	]);
 
-	insertar($db, 'INSERT INTO unidades (placas, modelo) VALUES (?, ?)', [
-		['GT-4521-A', 'Kenworth T680'],
-		['GT-7834-B', 'Freightliner Cascadia'],
-		['GT-1290-C', 'International LT625'],
-		['QR-5567-D', 'Volvo VNL 760'],
-		['GT-3345-E', 'Kenworth T880'],
-		['GT-8812-F', 'Freightliner M2 106'],
+	insertar($db, 'INSERT INTO unidades (placa, marca, modelo, anio) VALUES (?, ?, ?, ?)', [
+		['GT-4521-A', 'Kenworth',      'T680',     2021],
+		['GT-7834-B', 'Freightliner',  'Cascadia', 2020],
+		['GT-1290-C', 'International', 'LT625',    2019],
+		['QR-5567-D', 'Volvo',         'VNL 760',  2022],
+		['GT-3345-E', 'Kenworth',      'T880',     2018],
+		['GT-8812-F', 'Freightliner',  'M2 106',   2023],
 	]);
 
 	insertar($db, 'INSERT INTO fletes (cliente_id, chofer_id, unidad_id, origen, destino, monto, estatus, pagado, fecha)
