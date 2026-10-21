@@ -19,6 +19,7 @@
 			<nav class="navegacion">
 				<a x-link.activity href="/">Inicio</a>
 				<a x-link.activity href="/fletes/nuevo">Nuevo flete</a>
+				<a x-link.activity href="/fletes/por-pagar">Por pagar</a>
 				<a x-link.activity href="/clientes">Clientes</a>
 				<a x-link.activity href="/choferes">Choferes</a>
 				<a x-link.activity href="/unidades">Unidades</a>
@@ -112,6 +113,33 @@
 							<a x-link href="/">Cancelar</a>
 						</div>
 					</form>
+				</section>
+			</template>
+
+			<template x-route="/fletes/por-pagar">
+				<section x-data="porPagar">
+					<h2>Fletes por pagar</h2>
+					<p x-show="cargando">Cargando…</p>
+					<div x-show="!cargando">
+						<p x-show="!fletes.length">No hay fletes pendientes de pago.</p>
+						<table x-show="fletes.length">
+							<thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Ruta</th><th>Estatus</th><th>Monto</th><th></th></tr></thead>
+							<tbody>
+								<template x-for="f in fletes" :key="f.id">
+									<tr>
+										<td x-text="f.id"></td>
+										<td x-text="f.fecha"></td>
+										<td x-text="f.cliente"></td>
+										<td x-text="`${f.origen} → ${f.destino}`"></td>
+										<td x-text="etiqueta(f.estatus)"></td>
+										<td x-text="dinero(f.monto)"></td>
+										<td class="acciones"><button @click="pagar(f)">Marcar pagado</button></td>
+									</tr>
+								</template>
+							</tbody>
+							<tfoot><tr><th colspan="5">Total por cobrar</th><th x-text="dinero(total)"></th><th></th></tr></tfoot>
+						</table>
+					</div>
 				</section>
 			</template>
 

@@ -169,6 +169,40 @@ document.addEventListener('alpine:init', () => {
 		},
 	}));
 
+	Alpine.data('porPagar', () => ({
+		fletes: [],
+		cargando: true,
+
+		init() {
+			this.cargar();
+		},
+
+		async cargar() {
+			try {
+				this.fletes = await api('fletes', { params: { pagado: 0 } });
+			} catch (e) {
+				avisar(e.message, 'error');
+			} finally {
+				this.cargando = false;
+			}
+		},
+
+		get total() {
+			return this.fletes.reduce((suma, f) => suma + f.monto, 0);
+		},
+
+		async pagar(flete) {
+			if (!confirm(`¿Marcar como pagado el flete #${flete.id} por ${dinero(flete.monto)}?`)) return;
+			try {
+				await api('fletes', { id: flete.id, metodo: 'PUT', datos: { pagado: 1 } });
+				avisar(`Flete #${flete.id} pagado`);
+				await this.cargar();
+			} catch (e) {
+				avisar(e.message, 'error');
+			}
+		},
+	}));
+
 	Alpine.data('nuevoFlete', () => ({
 		clientes: [],
 		choferes: [],
