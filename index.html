@@ -184,31 +184,35 @@
 			</template>
 
 			<template x-route="/choferes">
-				<section x-data="catalogo('choferes', ['nombre', 'licencia'])">
-					<h2>Choferes</h2>
-					<form @submit.prevent="guardar">
-						<fieldset>
-							<legend x-text="editando ? `Editar chofer #${editando}` : 'Nuevo chofer'"></legend>
-							<label>Nombre <input x-model="form.nombre" required></label>
-							<small class="error-campo" x-text="errores.nombre"></small>
-							<label>Licencia <input x-model="form.licencia" required></label>
-							<small class="error-campo" x-text="errores.licencia"></small>
-							<div>
-								<button :disabled="guardando" x-text="editando ? 'Guardar cambios' : 'Agregar'"></button>
-								<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
-							</div>
-						</fieldset>
-					</form>
+				<section x-data="{ ...catalogo('choferes', ['nombre', 'licencia']), filtro: '' }">
+				<h2>Choferes</h2>
+			<form @submit.prevent="guardar">
+				<fieldset>
+					<legend x-text="editando ? `Editar chofer #${editando}` : 'Nuevo chofer'"></legend>
+					<label>Nombre <input x-model="form.nombre" required></label>
+					<small class="error-campo" x-text="errores.nombre"></small>
+					<label>Licencia <input x-model="form.licencia" required></label>
+					<small class="error-campo" x-text="errores.licencia"></small>
+					<div>
+						<button :disabled="guardando" x-text="guardando ? 'Procesando...' : (editando ? 'Guardar cambios' : 'Agregar')"></button>
+						<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
+					</div>
+				</fieldset>
+			</form>
+			<hr style="margin: 2em 0; border-color: #333;">
+				<div style="display: flex; justify-content: space-between; align-items: center;">
+				<p x-show="cargando" style="margin: 0;">Cargando…</p>
+				<input x-show="!cargando" type="search" class="buscador-inline" x-model="filtro" placeholder="Buscar por nombre o licencia...">
+			</div>
 
-					<p x-show="cargando">Cargando…</p>
-					<table x-show="!cargando">
-						<thead><tr><th>#</th><th>Nombre</th><th>Licencia</th><th>Estado</th><th></th></tr></thead>
-						<tbody>
-							<template x-for="c in filas" :key="c.id">
-								<tr>
-									<td x-text="c.id"></td>
-									<td x-text="c.nombre"></td>
-									<td x-text="c.licencia"></td>
+			<table x-show="!cargando">
+				<thead><tr><th>#</th><th>Nombre</th><th>Licencia</th><th>Estado</th><th></th></tr></thead>
+				<tbody>
+				<template x-for="c in filas.filter(f => f.nombre.toLowerCase().includes(filtro.toLowerCase()) || f.licencia.toLowerCase().includes(filtro.toLowerCase()))" :key="c.id">
+					<tr>
+						<td x-text="c.id"></td>
+						<td x-text="c.nombre"></td>
+						<td x-text="c.licencia"></td>
 									<td>
 										<span class="estado" :class="c.estado" x-text="etiqueta(c.estado)"></span>
 										<small x-show="c.flete_actual" x-text="`flete #${c.flete_actual}`"></small>
@@ -225,37 +229,39 @@
 			</template>
 
 			<template x-route="/unidades">
-				<section x-data="catalogo('unidades', ['placa', 'marca', 'modelo', 'anio'])">
-					<h2>Unidades</h2>
-					<form @submit.prevent="guardar">
-						<fieldset>
-							<legend x-text="editando ? `Editar unidad #${editando}` : 'Nueva unidad'"></legend>
+				<section x-data="{ ...catalogo('unidades', ['placa', 'marca', 'modelo', 'anio']), filtro: '' }">
+				<h2>Unidades</h2>
+				<form @submit.prevent="guardar">
+					<fieldset>
+						<legend x-text="editando ? `Editar unidad #${editando}` : 'Nueva unidad'"></legend>
+						<div class="rejilla">
 							<label>Placa <input x-model="form.placa" required placeholder="GT-1234-A"></label>
-							<small class="error-campo" x-text="errores.placa"></small>
 							<label>Marca <input x-model="form.marca" required placeholder="Kenworth"></label>
-							<small class="error-campo" x-text="errores.marca"></small>
 							<label>Modelo <input x-model="form.modelo" required placeholder="T680"></label>
-							<small class="error-campo" x-text="errores.modelo"></small>
 							<label>Año <input type="number" x-model="form.anio" required min="1950" max="2100"></label>
-							<small class="error-campo" x-text="errores.anio"></small>
-							<div>
-								<button :disabled="guardando" x-text="editando ? 'Guardar cambios' : 'Agregar'"></button>
-								<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
-							</div>
-						</fieldset>
-					</form>
-
-					<p x-show="cargando">Cargando…</p>
-					<table x-show="!cargando">
-						<thead><tr><th>#</th><th>Placa</th><th>Marca</th><th>Modelo</th><th>Año</th><th>Estado</th><th></th></tr></thead>
-						<tbody>
-							<template x-for="u in filas" :key="u.id">
-								<tr>
-									<td x-text="u.id"></td>
-									<td x-text="u.placa"></td>
-									<td x-text="u.marca"></td>
-									<td x-text="u.modelo"></td>
-									<td x-text="u.anio"></td>
+						</div>
+							<small class="error-campo" x-text="errores.placa || errores.marca || errores.modelo || errores.anio"></small>
+						<div style="margin-top: 1em;">
+							<button :disabled="guardando" x-text="guardando ? 'Procesando...' : (editando ? 'Guardar cambios' : 'Agregar')"></button>
+							<button type="button" x-show="editando" @click="limpiar()">Cancelar</button>
+						</div>
+					</fieldset>
+				</form>
+				<hr style="margin: 2em 0; border-color: #333;">
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<p x-show="cargando" style="margin: 0;">Cargando…</p>
+						<input x-show="!cargando" type="search" class="buscador-inline" x-model="filtro" placeholder="Buscar por placa o marca...">
+					</div>
+			<table x-show="!cargando">
+				<thead><tr><th>#</th><th>Placa</th><th>Marca</th><th>Modelo</th><th>Año</th><th>Estado</th><th></th></tr></thead>
+			<tbody>
+				<template x-for="u in filas.filter(f => f.placa.toLowerCase().includes(filtro.toLowerCase()) || f.marca.toLowerCase().includes(filtro.toLowerCase()))" :key="u.id">
+					<tr>
+						<td x-text="u.id"></td>
+						<td x-text="u.placa"></td>
+						<td x-text="u.marca"></td>
+						<td x-text="u.modelo"></td>
+						<td x-text="u.año"></td>
 									<td>
 										<span class="estado" :class="u.estado" x-text="etiqueta(u.estado)"></span>
 										<small x-show="u.flete_actual" x-text="`flete #${u.flete_actual}`"></small>
