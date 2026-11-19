@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Detalle de Cliente · Fletes Xpress</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2.1.1/out/water.css">
+	<link rel="stylesheet" href="estilos.css">
+
+	<style>
+		.resumen-cliente {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			gap: 1em;
+			margin: 1.5em 0;
+		}
+		.resumen-cliente article {
+			padding: 0.8em 1em;
+			border-radius: 6px;
+			background: var(--background-alt);
+		}
+		.resumen-cliente small {
+			display: block;
+			opacity: 0.7;
+		}
+		.resumen-cliente strong {
+			font-size: 1.3em;
+		}
+	</style>
+
+	<!-- Reutiliza api(), dinero(), etiqueta(), avisar() y el store de avisos -->
+	<script src="app.js"></script>
+
+	<script>
+		// Detalle de Cliente e Historial de viajes
+		// Usa los endpoints existentes de api.php:
+		//   GET api.php?recurso=clientes          -> lista de clientes
+		//   GET api.php?recurso=clientes&id=X     -> datos y resumen del cliente
+		//   GET api.php?recurso=fletes            -> todos los fletes (se filtran por cliente)
+		document.addEventListener('alpine:init', () => {
+			Alpine.data('detalleCliente', () => ({
+				clientes: [],
+				clienteId: '',
+				cliente: null,
+				viajes: [],
+				cargando: false,
+				filtroEstatus: '',
+				filtroPago: '',
+
+				async init() {
+					try {
+						this.clientes = await api('clientes');
+					} catch (e) {
+						avisar(e.message, 'error');
+					}
+					const id = new URLSearchParams(location.search).get('id');
+					if (id) {
+						this.clienteId = id;
+						await this.cargar();
+					}
+				},
+
+				async cargar() {
+					if (!this.clienteId) {
+						this.cliente = null;
+						this.viajes = [];
+						return;
+					}
+					history.replaceState(null, '', `?id=${this.clienteId}`);
+					this.cargando = true;
+					try {
+						const [cliente, fletes] = await Promise.all([
+							api('clientes', { id: this.clienteId }),
+							api('fletes'),
+						]);
+						this.cliente = cliente;
+						this.viajes = fletes.filter((f) => f.cliente_id === Number(this.clienteId));
+					} catch (e) {
+						this.cliente = null;
+						this.viajes = [];
+						avisar(e.message, 'error');
+					} finally {
+						this.cargando = false;
+					}
+				},
+
+				get activos() {
+					return this.viajes.filter((f) => f.estatus !== 'entregado').length;
+				},
+
+				get cobrado() {
+					return this.cliente.ingresos_generados - this.cliente.por_cobrar;
+				},
+
+				get historial() {
+					return this.viajes.filter((f) =>
+						(this.filtroEstatus === '' || f.estatus === this.filtroEstatus) &&
+						(this.filtroPago === '' || String(f.pagado) === this.filtroPago)
+					);
+				},
+
+				get totalFiltrado() {
+					return this.historial.reduce((suma, f) => suma + f.monto, 0);
+				},
+			}));
+		});
+	</script>
+
+	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.17.4/dist/cdn.min.js"></script>
+</head>
+<body>
+	<div x-data>
+		<header class="barra">
+			<h1>Fletes Xpress</h1>
+			<nav class="navegacion">
+				<a href="index.html">Inicio</a>
+				<a href="index.html#/clientes">Clientes</a>
+			</nav>
+		</header>
+
+		<div class="aviso" :class="$store.aviso.tipo" x-show="$store.aviso.texto" x-transition x-text="$store.aviso.texto"></div>
+
+		<main id="principal">
+			<section x-data="detalleCliente">
+				<h2>Detalle de cliente</h2>
+
+				<label>Cliente
+					<select x-model="clienteId" @change="cargar()">
+						<option value="">Selecciona…</option>
+						<template x-for="c in clientes" :key="c.id">
+							<option :value="c.id" x-text="c.razon_social"></option>
+						</template>
+					</select>
+				</label>
+
+				<p x-show="cargando">Cargando…</p>
+
+				<template x-if="!cargando && cliente">
+					<div>
+						<h3 x-text="cliente.razon_social"></h3>
+						<p>
+							<strong>RFC:</strong> <span x-text="cliente.rfc"></span> ·
+							<strong>Email:</strong> <a :href="`mailto:${cliente.email}`" x-text="cliente.email"></a>
+						</p>
+
+						<div class="resumen-cliente">
+							<article><small>Viajes</small><strong x-text="cliente.total_fletes"></strong></article>
+							<article><small>Activos</small><strong x-text="activos"></strong></article>
+							<article><small>Facturado</small><strong x-text="dinero(cliente.ingresos_generados)"></strong></article>
+							<article><small>Cobrado</small><strong x-text="dinero(cobrado)"></strong></article>
+							<article><small>Por cobrar</small><strong x-text="dinero(cliente.por_cobrar)"></strong></article>
+						</div>
+
+						<h3>Historial de viajes</h3>
+						<div class="rejilla">
+							<label>Estatus
+								<select x-model="filtroEstatus">
+									<option value="">Todos</option>
+									<option value="pendiente">Pendiente</option>
+									<option value="en_transito">En tránsito</option>
+									<option value="entregado">Entregado</option>
+								</select>
+							</label>
+							<label>Pago
+								<select x-model="filtroPago">
+									<option value="">Todos</option>
+									<option value="1">Pagado</option>
+									<option value="0">Por cobrar</option>
+								</select>
+							</label>
+						</div>
+
+						<p x-show="!historial.length">Este cliente no tiene viajes con esos filtros.</p>
+						<table x-show="historial.length">
+							<thead><tr><th>#</th><th>Fecha</th><th>Ruta</th><th>Chofer</th><th>Unidad</th><th>Estatus</th><th>Pago</th><th>Monto</th></tr></thead>
+							<tbody>
+								<template x-for="f in historial" :key="f.id">
+									<tr>
+										<td x-text="f.id"></td>
+										<td x-text="f.fecha"></td>
+										<td x-text="`${f.origen} → ${f.destino}`"></td>
+										<td x-text="f.chofer"></td>
+										<td x-text="`${f.placa} · ${f.marca} ${f.modelo}`"></td>
+										<td x-text="etiqueta(f.estatus)"></td>
+										<td><span :class="f.pagado ? 'badge-pagado' : 'badge-pendiente'" x-text="f.pagado ? 'Pagado' : 'Por cobrar'"></span></td>
+										<td x-text="dinero(f.monto)"></td>
+									</tr>
+								</template>
+							</tbody>
+							<tfoot><tr><th colspan="7" x-text="`Total (${historial.length} viajes)`"></th><th x-text="dinero(totalFiltrado)"></th></tr></tfoot>
+						</table>
+					</div>
+				</template>
+			</section>
+		</main>
+
+		<footer>
+			Derechos reservados por AM
+		</footer>
+	</div>
+</body>
+</html>
