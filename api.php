@@ -269,6 +269,18 @@ function obtener($db, $recurso, $id) {
     return uno($db, "SELECT * FROM $tabla WHERE id = :id", [':id' => $id]);
 }
 
+function dashboard($db) {
+    return [
+        'kpis' => uno($db,
+            "SELECT COUNT(*) AS total_fletes,
+                    COUNT(CASE WHEN estatus = 'en_transito' THEN 1 END) AS en_transito,
+                    COALESCE(SUM(monto), 0) AS ingresos,
+                    COALESCE(SUM(CASE WHEN pagado = 0 THEN monto END), 0) AS por_cobrar,
+                    COALESCE(ROUND(AVG(monto), 2), 0) AS monto_promedio
+             FROM fletes"),
+    ];
+}
+
 try {
     $db = new SQLite3(__DIR__ . '/database.sqlite');
     $db->enableExceptions(true);
@@ -281,6 +293,17 @@ $recurso = $_GET['recurso'] ?? null;
 
 if ($recurso === null) {
     error(400, 'Falta el parámetro "recurso". Disponibles: ' . implode(', ', array_keys(RECURSOS)));
+}
+
+if ($recurso === 'dashboard') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        error(405, 'El dashboard solo acepta GET');
+    }
+    try {
+        responder(200, dashboard($db));
+    } catch (Exception $e) {
+        error(500, 'Error en la base de datos: ' . $e->getMessage());
+    }
 }
 
 if (!array_key_exists($recurso, RECURSOS)) {
