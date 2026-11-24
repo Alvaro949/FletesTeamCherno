@@ -278,6 +278,14 @@ function dashboard($db) {
                     COALESCE(SUM(CASE WHEN pagado = 0 THEN monto END), 0) AS por_cobrar,
                     COALESCE(ROUND(AVG(monto), 2), 0) AS monto_promedio
              FROM fletes"),
+        'top_clientes' => todos($db,
+            "SELECT c.id, c.razon_social, COUNT(*) AS fletes, SUM(f.monto) AS ingresos
+             FROM fletes f JOIN clientes c ON c.id = f.cliente_id
+             GROUP BY c.id ORDER BY ingresos DESC LIMIT 3"),
+        'top_choferes' => todos($db,
+            "SELECT ch.id, ch.nombre, COUNT(*) AS fletes, SUM(f.monto) AS ingresos
+             FROM fletes f JOIN choferes ch ON ch.id = f.chofer_id
+             GROUP BY ch.id ORDER BY fletes DESC, ingresos DESC LIMIT 3"),
     ];
 }
 
