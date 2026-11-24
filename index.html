@@ -173,6 +173,7 @@
 									<td x-text="c.rfc"></td>
 									<td x-text="c.email"></td>
 									<td class="acciones">
+										<a :href="`detalle-cliente.html?id=${c.id}`">Historial</a>
 										<button @click="editar(c)">Editar</button>
 										<button @click="eliminar(c, c.razon_social)">Eliminar</button>
 									</td>

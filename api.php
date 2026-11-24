@@ -356,6 +356,10 @@ try {
                     $where[] = 'f.pagado = :pagado';
                     $params[':pagado'] = (int) $_GET['pagado'];
                 }
+                if (isset($_GET['cliente_id']) && $_GET['cliente_id'] !== '') {
+                    $where[] = 'f.cliente_id = :cliente_id';
+                    $params[':cliente_id'] = (int) $_GET['cliente_id'];
+                }
                 $sql = SELECT_FLETES
                      . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
                      . ' ORDER BY f.fecha DESC, f.id DESC';

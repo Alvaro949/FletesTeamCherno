@@ -238,4 +238,68 @@ document.addEventListener('alpine:init', () => {
 			}
 		},
 	}));
+
+	Alpine.data('detalleCliente', () => ({
+		clientes: [],
+		clienteId: '',
+		cliente: null,
+		viajes: [],
+		cargando: false,
+		filtroEstatus: '',
+		filtroPago: '',
+
+		async init() {
+			try {
+				this.clientes = await api('clientes');
+			} catch (e) {
+				avisar(e.message, 'error');
+			}
+			const id = new URLSearchParams(location.search).get('id');
+			if (id) {
+				this.clienteId = id;
+				await this.cargar();
+			}
+		},
+
+		async cargar() {
+			if (!this.clienteId) {
+				this.cliente = null;
+				this.viajes = [];
+				return;
+			}
+			history.replaceState(null, '', `?id=${this.clienteId}`);
+			this.cargando = true;
+			try {
+				[this.cliente, this.viajes] = await Promise.all([
+					api('clientes', { id: this.clienteId }),
+					api('fletes', { params: { cliente_id: this.clienteId } }),
+				]);
+			} catch (e) {
+				this.cliente = null;
+				this.viajes = [];
+				avisar(e.message, 'error');
+			} finally {
+				this.cargando = false;
+			}
+		},
+
+		get activos() {
+			return this.viajes.filter((f) => f.estatus !== 'entregado').length;
+		},
+
+		get cobrado() {
+			return this.cliente.ingresos_generados - this.cliente.por_cobrar;
+		},
+
+		get historial() {
+			return this.viajes.filter((f) =>
+				(this.filtroEstatus === '' || f.estatus === this.filtroEstatus) &&
+				(this.filtroPago === '' || String(f.pagado) === this.filtroPago)
+			);
+		},
+
+		get totalFiltrado() {
+			return this.historial.reduce((suma, f) => suma + f.monto, 0);
+		},
+	}));
 });
