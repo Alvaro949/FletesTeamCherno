@@ -269,7 +269,19 @@ function obtener($db, $recurso, $id) {
     return uno($db, "SELECT * FROM $tabla WHERE id = :id", [':id' => $id]);
 }
 
-function dashboard($db) {
+function dashboard($db, $anio) {
+    $porMes = [];
+    for ($mes = 1; $mes <= 12; $mes++) {
+        $porMes[] = ['mes' => $mes, 'fletes' => 0, 'ingresos' => 0];
+    }
+    $filas = todos($db,
+        "SELECT CAST(strftime('%m', fecha) AS INTEGER) AS mes, COUNT(*) AS fletes, SUM(monto) AS ingresos
+         FROM fletes WHERE strftime('%Y', fecha) = :anio GROUP BY mes",
+        [':anio' => (string) $anio]);
+    foreach ($filas as $fila) {
+        $porMes[$fila['mes'] - 1] = $fila;
+    }
+
     return [
         'kpis' => uno($db,
             "SELECT COUNT(*) AS total_fletes,
@@ -286,6 +298,13 @@ function dashboard($db) {
             "SELECT ch.id, ch.nombre, COUNT(*) AS fletes, SUM(f.monto) AS ingresos
              FROM fletes f JOIN choferes ch ON ch.id = f.chofer_id
              GROUP BY ch.id ORDER BY fletes DESC, ingresos DESC LIMIT 3"),
+        'anio' => $anio,
+        'por_mes' => $porMes,
+        'unidades' => todos($db,
+            "SELECT u.id, u.placa, u.marca, u.modelo, COUNT(f.id) AS fletes, COALESCE(SUM(f.monto), 0) AS ingresos
+             FROM unidades u LEFT JOIN fletes f ON f.unidad_id = u.id AND strftime('%Y', f.fecha) = :anio
+             GROUP BY u.id ORDER BY fletes DESC, ingresos DESC",
+            [':anio' => (string) $anio]),
     ];
 }
 
@@ -308,7 +327,7 @@ if ($recurso === 'dashboard') {
         error(405, 'El dashboard solo acepta GET');
     }
     try {
-        responder(200, dashboard($db));
+        responder(200, dashboard($db, entero($_GET['anio'] ?? null) ?? (int) date('Y')));
     } catch (Exception $e) {
         error(500, 'Error en la base de datos: ' . $e->getMessage());
     }
