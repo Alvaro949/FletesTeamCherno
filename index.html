@@ -18,6 +18,7 @@
 			<h1>Fletes Xpress</h1>
 			<nav class="navegacion">
 				<a x-link.activity href="/">Inicio</a>
+				<a x-link.activity href="/dashboard">Dashboard</a>
 				<a x-link.activity href="/fletes/nuevo">Nuevo flete</a>
 				<a x-link.activity href="/fletes/por-pagar">Por pagar</a>
 				<a x-link.activity href="/clientes">Clientes</a>
@@ -54,6 +55,20 @@
 									</article>
 								</template>
 							</div>
+						</div>
+					</template>
+				</section>
+			</template>
+
+			<template x-route="/dashboard">
+				<section x-data="dashboard">
+					<h2>Dashboard</h2>
+					<p x-show="!datos">Cargando…</p>
+					<template x-if="datos">
+						<div class="resumen-cliente numerotes">
+							<article><strong x-text="datos.kpis.total_fletes"></strong><small>Fletes</small></article>
+							<article><strong x-text="dinero(datos.kpis.ingresos)"></strong><small>Ingresos</small></article>
+							<article><strong x-text="dinero(datos.kpis.por_cobrar)"></strong><small>Por cobrar</small></article>
 						</div>
 					</template>
 				</section>

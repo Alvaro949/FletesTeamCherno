@@ -260,3 +260,12 @@ footer {
 .resumen-cliente strong {
 	font-size: 1.3em;
 }
+
+.numerotes article {
+	text-align: center;
+}
+
+.numerotes strong {
+	display: block;
+	font-size: 2em;
+}

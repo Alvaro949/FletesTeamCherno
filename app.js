@@ -174,6 +174,18 @@ document.addEventListener('alpine:init', () => {
 		},
 	}));
 
+	Alpine.data('dashboard', () => ({
+		datos: null,
+
+		async init() {
+			try {
+				this.datos = await api('dashboard');
+			} catch (e) {
+				avisar(e.message, 'error');
+			}
+		},
+	}));
+
 	Alpine.data('porPagar', () => ({
 		fletes: [],
 		cargando: true,
