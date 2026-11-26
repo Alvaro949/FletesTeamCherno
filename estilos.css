@@ -277,6 +277,11 @@ footer {
 	margin-top: 0;
 }
 
+.tablero td small {
+	display: block;
+	opacity: 0.7;
+}
+
 .anio {
 	width: 6em;
 	display: inline-block;

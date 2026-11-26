@@ -78,6 +78,27 @@
 										</template>
 									</div>
 								</article>
+								<article>
+									<h3>Top 3</h3>
+									<table>
+										<thead><tr><th>#</th><th>Cliente</th><th>Chofer</th></tr></thead>
+										<tbody>
+											<template x-for="(fila, i) in top" :key="i">
+												<tr>
+													<td x-text="i + 1"></td>
+													<td>
+														<span x-text="fila.cliente?.razon_social ?? ''"></span>
+														<small x-show="fila.cliente" x-text="dinero(fila.cliente?.ingresos)"></small>
+													</td>
+													<td>
+														<span x-text="fila.chofer?.nombre ?? ''"></span>
+														<small x-show="fila.chofer" x-text="`${fila.chofer?.fletes} fletes`"></small>
+													</td>
+												</tr>
+											</template>
+										</tbody>
+									</table>
+								</article>
 							</div>
 							<div class="resumen-cliente numerotes">
 								<article><strong x-text="datos.kpis.total_fletes"></strong><small>Fletes</small></article>

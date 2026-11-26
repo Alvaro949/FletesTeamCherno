@@ -190,6 +190,11 @@ document.addEventListener('alpine:init', () => {
 			}
 		},
 
+		get top() {
+			const { top_clientes: clientes, top_choferes: choferes } = this.datos;
+			return Array.from({ length: Math.max(clientes.length, choferes.length) }, (_, i) => ({ cliente: clientes[i], chofer: choferes[i] }));
+		},
+
 		altura(ingresos) {
 			const maximo = Math.max(...this.datos.por_mes.map((m) => m.ingresos));
 			return maximo ? (ingresos / maximo) * 100 : 0;
