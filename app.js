@@ -68,6 +68,7 @@ document.addEventListener('alpine:init', () => {
 		errores: {},
 		cargando: true,
 		guardando: false,
+		confirmando: null,
 
 		init() {
 			this.limpiar();
@@ -118,8 +119,12 @@ document.addEventListener('alpine:init', () => {
 			}
 		},
 
-		async eliminar(fila, descripcion) {
-			if (!confirm(`¿Eliminar ${descripcion}?`)) return;
+		async eliminar(fila) {
+			if (this.confirmando !== fila.id) {
+				this.confirmando = fila.id;
+				return;
+			}
+			this.confirmando = null;
 			try {
 				await api(recurso, { id: fila.id, metodo: 'DELETE' });
 				avisar('Registro eliminado');

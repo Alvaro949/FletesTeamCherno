@@ -175,7 +175,7 @@
 									<td class="acciones">
 										<a :href="`detalle-cliente.html?id=${c.id}`">Historial</a>
 										<button @click="editar(c)">Editar</button>
-										<button @click="eliminar(c, c.razon_social)">Eliminar</button>
+										<button @click="eliminar(c)" x-text="confirmando === c.id ? '¿Confirmar?' : 'Eliminar'"></button>
 									</td>
 								</tr>
 							</template>
@@ -220,7 +220,7 @@
 									</td>
 									<td class="acciones">
 										<button @click="editar(c)">Editar</button>
-										<button @click="eliminar(c, c.nombre)">Eliminar</button>
+										<button @click="eliminar(c)" x-text="confirmando === c.id ? '¿Confirmar?' : 'Eliminar'"></button>
 									</td>
 								</tr>
 							</template>
@@ -269,7 +269,7 @@
 									</td>
 									<td class="acciones">
 										<button @click="editar(u)">Editar</button>
-										<button @click="eliminar(u, `la unidad ${u.placa}`)">Eliminar</button>
+										<button @click="eliminar(u)" x-text="confirmando === u.id ? '¿Confirmar?' : 'Eliminar'"></button>
 									</td>
 								</tr>
 							</template>
