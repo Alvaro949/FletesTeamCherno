@@ -68,7 +68,7 @@
 						<div>
 							<div class="tablero">
 								<article>
-									<h3>Ingresos <input type="number" class="anio" x-model.number="anio" @change="cargar()"></h3>
+									<h3>Facturado por mes <input type="number" class="anio" x-model.number="anio" @change="cargar()"></h3>
 									<div class="grafica">
 										<template x-for="m in datos.por_mes" :key="m.mes">
 											<div class="columna" :title="`${m.fletes} fletes · ${dinero(m.ingresos)}`">
