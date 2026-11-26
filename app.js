@@ -176,13 +176,27 @@ document.addEventListener('alpine:init', () => {
 
 	Alpine.data('dashboard', () => ({
 		datos: null,
+		anio: new Date().getFullYear(),
 
-		async init() {
+		init() {
+			this.cargar();
+		},
+
+		async cargar() {
 			try {
-				this.datos = await api('dashboard');
+				this.datos = await api('dashboard', { params: { anio: this.anio } });
 			} catch (e) {
 				avisar(e.message, 'error');
 			}
+		},
+
+		altura(ingresos) {
+			const maximo = Math.max(...this.datos.por_mes.map((m) => m.ingresos));
+			return maximo ? (ingresos / maximo) * 100 : 0;
+		},
+
+		mes(numero) {
+			return new Date(2000, numero - 1).toLocaleString('es-MX', { month: 'short' });
 		},
 	}));
 

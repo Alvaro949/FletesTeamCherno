@@ -65,10 +65,25 @@
 					<h2>Dashboard</h2>
 					<p x-show="!datos">Cargando…</p>
 					<template x-if="datos">
-						<div class="resumen-cliente numerotes">
-							<article><strong x-text="datos.kpis.total_fletes"></strong><small>Fletes</small></article>
-							<article><strong x-text="dinero(datos.kpis.ingresos)"></strong><small>Ingresos</small></article>
-							<article><strong x-text="dinero(datos.kpis.por_cobrar)"></strong><small>Por cobrar</small></article>
+						<div>
+							<div class="tablero">
+								<article>
+									<h3>Ingresos <input type="number" class="anio" x-model.number="anio" @change="cargar()"></h3>
+									<div class="grafica">
+										<template x-for="m in datos.por_mes" :key="m.mes">
+											<div class="columna" :title="`${m.fletes} fletes · ${dinero(m.ingresos)}`">
+												<div :style="`height: ${altura(m.ingresos)}%`"></div>
+												<small x-text="mes(m.mes)"></small>
+											</div>
+										</template>
+									</div>
+								</article>
+							</div>
+							<div class="resumen-cliente numerotes">
+								<article><strong x-text="datos.kpis.total_fletes"></strong><small>Fletes</small></article>
+								<article><strong x-text="dinero(datos.kpis.ingresos)"></strong><small>Ingresos</small></article>
+								<article><strong x-text="dinero(datos.kpis.por_cobrar)"></strong><small>Por cobrar</small></article>
+							</div>
 						</div>
 					</template>
 				</section>
