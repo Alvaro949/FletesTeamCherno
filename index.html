@@ -133,7 +133,7 @@
 										<td x-text="`${f.origen} → ${f.destino}`"></td>
 										<td x-text="etiqueta(f.estatus)"></td>
 										<td x-text="dinero(f.monto)"></td>
-										<td class="acciones"><button @click="pagar(f)">Marcar pagado</button></td>
+										<td class="acciones"><button @click="pagar(f)" x-text="confirmando === f.id ? `¿Confirmar ${dinero(f.monto)}?` : 'Marcar pagado'"></button></td>
 									</tr>
 								</template>
 							</tbody>

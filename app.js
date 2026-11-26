@@ -172,6 +172,7 @@ document.addEventListener('alpine:init', () => {
 	Alpine.data('porPagar', () => ({
 		fletes: [],
 		cargando: true,
+		confirmando: null,
 
 		init() {
 			this.cargar();
@@ -192,7 +193,11 @@ document.addEventListener('alpine:init', () => {
 		},
 
 		async pagar(flete) {
-			if (!confirm(`¿Marcar como pagado el flete #${flete.id} por ${dinero(flete.monto)}?`)) return;
+			if (this.confirmando !== flete.id) {
+				this.confirmando = flete.id;
+				return;
+			}
+			this.confirmando = null;
 			try {
 				await api('fletes', { id: flete.id, metodo: 'PUT', datos: { pagado: 1 } });
 				avisar(`Flete #${flete.id} pagado`);
