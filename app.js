@@ -244,6 +244,46 @@ document.addEventListener('alpine:init', () => {
 		},
 	}));
 
+	Alpine.data('historial', () => ({
+		fletes: [],
+		cargando: true,
+		busqueda: '',
+		filtroEstatus: '',
+		filtroPago: '',
+		desde: '',
+		hasta: '',
+
+		init() {
+			this.cargar();
+		},
+
+		async cargar() {
+			try {
+				this.fletes = await api('fletes');
+			} catch (e) {
+				avisar(e.message, 'error');
+			} finally {
+				this.cargando = false;
+			}
+		},
+
+		get filtrados() {
+			const q = this.busqueda.toLowerCase();
+			return this.fletes.filter((f) =>
+				(this.filtroEstatus === '' || f.estatus === this.filtroEstatus) &&
+				(this.filtroPago === '' || String(f.pagado) === this.filtroPago) &&
+				(this.desde === '' || f.fecha >= this.desde) &&
+				(this.hasta === '' || f.fecha <= this.hasta) &&
+				(q === '' || [f.cliente, f.chofer, f.placa, f.origen, f.destino]
+					.some((t) => t.toLowerCase().includes(q)))
+			);
+		},
+
+		get total() {
+			return this.filtrados.reduce((suma, f) => suma + f.monto, 0);
+		},
+	}));
+
 	Alpine.data('nuevoFlete', () => ({
 		clientes: [],
 		choferes: [],
